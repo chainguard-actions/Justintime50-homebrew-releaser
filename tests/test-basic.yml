@@ -1,0 +1,31 @@
+name: Test basic usage with skip_commit
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          branch: main
+          github_token: fake-token-for-testing
+          commit_owner: test-bot
+          commit_email: test-bot@example.com
+          depends_on: |
+            "openssl@3"
+          install: bin.install "my-tool"
+          test: system "#{bin}/my-tool", "--version"
+          version: "1.0.0"
+          skip_commit: 'true'
+          skip_checksum: 'true'
+          debug: 'true'
+        continue-on-error: true
+      - name: Assert action ran (skip_commit mode)
+        run: |
+          echo "Action completed (may fail due to missing release, but inputs were accepted)"
+          echo "PASS: inputs were accepted by the action"

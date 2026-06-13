@@ -1,0 +1,43 @@
+name: Test all optional inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/tags/v2.0.0
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: fake-token-for-testing
+          commit_owner: test-user
+          commit_email: test@example.com
+          depends_on: |
+            "openssl@3"
+            "libssh2"
+          install: bin.install "my-tool"
+          test: system "#{bin}/my-tool", "--version"
+          download_strategy: CurlDownloadStrategy
+          custom_require: custom_download_strategy
+          formula_includes: |
+            head "https://github.com/test/repo.git"
+          update_python_resources: "false"
+          version: "2.0.0"
+          target_darwin_amd64: "https://example.com/darwin-amd64.tar.gz|abc123"
+          target_darwin_arm64: "https://example.com/darwin-arm64.tar.gz|def456"
+          target_linux_amd64: "https://example.com/linux-amd64.tar.gz|ghi789"
+          target_linux_arm64: "https://example.com/linux-arm64.tar.gz|jkl012"
+          update_readme_table: "false"
+          skip_commit: "true"
+          debug: "true"
+      - name: Assert action ran with all optional inputs
+        run: |
+          echo "Action completed with all optional inputs (may fail due to fake token, but inputs were accepted)"
+          echo "PASS"

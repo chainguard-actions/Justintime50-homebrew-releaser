@@ -8,6 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
+| v3.1.0 | [`v3.1.0`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.1.0) | [`635beb6`](https://github.com/Justintime50/homebrew-releaser/commit/635beb66deebc86626c33bd41e39ff2442e2a9cc) |
 | v3.3.0 | [`v3.3.0`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.3.0) | [`a62d7a3`](https://github.com/Justintime50/homebrew-releaser/commit/a62d7a359683bfc047cdb2431f53ee58241464d1) |
 
 ## Privacy

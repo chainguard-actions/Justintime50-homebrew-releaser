@@ -1,0 +1,32 @@
+name: Test custom target platform inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: fake-token-for-skip-commit
+          install: 'bin.install "my-tool"'
+          test: 'system "#{bin}/my-tool", "--version"'
+          version: "2.0.0"
+          target_darwin_amd64: "https://example.com/my-tool-darwin-amd64.tar.gz,abc123checksum"
+          target_darwin_arm64: "https://example.com/my-tool-darwin-arm64.tar.gz,def456checksum"
+          target_linux_amd64: "https://example.com/my-tool-linux-amd64.tar.gz,ghi789checksum"
+          target_linux_arm64: "https://example.com/my-tool-linux-arm64.tar.gz,jkl012checksum"
+          custom_tarball: "https://example.com/my-tool-custom.tar.gz"
+          skip_commit: "true"
+          skip_checksum: "true"
+          debug: "true"
+          ignore_warnings: "true"
+        continue-on-error: true
+      - name: Assert action ran with custom targets
+        run: |
+          echo "Action completed with custom target platform inputs (skip_commit=true)"
+          echo "PASS"

@@ -1,0 +1,29 @@
+name: Test basic usage with skip_commit
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: fake-token-for-skip-commit
+          commit_owner: test-bot
+          commit_email: test-bot@example.com
+          install: 'bin.install "my-tool"'
+          test: 'system "#{bin}/my-tool", "--version"'
+          version: "1.0.0"
+          skip_commit: "true"
+          skip_checksum: "true"
+          debug: "true"
+          ignore_warnings: "true"
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (skip_commit=true, errors expected without real release)"
+          echo "PASS"

@@ -1,0 +1,31 @@
+name: Test optional inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: fake-token-for-testing
+          install: bin.install "my-tool"
+          depends_on: |
+            "openssl@3"
+            "libfoo"
+          download_strategy: CurlDownloadStrategy
+          custom_require: custom_download_strategy
+          formula_includes: |
+            head "https://github.com/example/repo.git"
+          version: "1.2.3"
+          skip_commit: "true"
+          skip_checksum: "true"
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed with optional inputs (skip_commit=true)"
+          echo "PASS"

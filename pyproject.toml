@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "homebrew-releaser"
+description = "Release scripts, binaries, and executables directly to Homebrew via GitHub Actions."
+dynamic = ["version"]
+readme = "README.md"
+requires-python = "==3.14.*"
+license = { text = "MIT" }
+authors = [{ name = "Justintime50" }]
+urls = { Homepage = "http://github.com/Justintime50/homebrew-releaser" }
+scripts = { homebrew-releaser = "homebrew_releaser.releaser:main" }
+dependencies = [
+    "chevron == 0.14.*",
+    "pretty-tables == 4.*",
+    "requests == 2.*",
+    "woodchips == 2.*",
+]
+optional-dependencies = { dev = [
+    "bandit == 1.9.*",
+    "black == 25.*",
+    "flake8 == 7.*",
+    "Flake8-pyproject == 1.2.*",
+    "isort == 7.*",
+    "mypy == 1.19.*",
+    "pytest == 9.*",
+    "pytest-cov == 7.*",
+] }
+
+[tool.setuptools.dynamic]
+version = { attr = "homebrew_releaser._version.__version__" }
+
+[tool.setuptools.packages.find]
+exclude = ["examples", "test"]
+
+[tool.setuptools.package-data]
+homebrew_releaser = ["py.typed"]
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+indent = 4
+force_grid_wrap = 2
+multi_line_output = 3
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+lines_after_imports = 2
+include_trailing_comma = true
+use_parentheses = true
+
+[tool.mypy]
+disable_error_code = "import-untyped"
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = "E203"

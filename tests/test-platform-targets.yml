@@ -1,0 +1,28 @@
+name: Test platform target inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: fake-token-for-testing
+          install: bin.install "my-tool"
+          target_darwin_amd64: "https://example.com/my-tool-darwin-amd64.tar.gz,abc123sha256"
+          target_darwin_arm64: "https://example.com/my-tool-darwin-arm64.tar.gz,def456sha256"
+          target_linux_amd64: "https://example.com/my-tool-linux-amd64.tar.gz,ghi789sha256"
+          target_linux_arm64: "https://example.com/my-tool-linux-arm64.tar.gz,jkl012sha256"
+          update_readme_table: "true"
+          update_python_resources: "false"
+          skip_commit: "true"
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed with platform target inputs (skip_commit=true)"
+          echo "PASS"

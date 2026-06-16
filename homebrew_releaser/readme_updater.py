@@ -1,0 +1,201 @@
+import os
+import re
+from typing import (
+    Any,
+    Optional,
+    Tuple,
+)
+
+import pretty_tables
+import woodchips
+
+from homebrew_releaser.constants import (
+    FORMULA_FOLDER,
+    LOGGER_NAME,
+    non_critical_warnings,
+)
+from homebrew_releaser.utils import build_dir_path
+
+
+TABLE_START_TAG = "<!-- project_table_start -->"
+TABLE_END_TAG = "<!-- project_table_end -->"
+
+
+def update_readme(homebrew_tap: str):
+    """Updates the homebrew tap README by replacing the old table string
+    with the updated table string if it can be found.
+    """
+    old_table, found_old_table = _retrieve_old_table(homebrew_tap)
+
+    # Only update the README table if both start/end tags were found
+    if found_old_table:
+        formulas = _format_formula_data(homebrew_tap)
+        new_table = _generate_table(formulas)
+
+        readme_content = _read_current_readme(homebrew_tap)
+        _replace_table_contents(readme_content, old_table, new_table, homebrew_tap)
+
+
+def _format_formula_data(homebrew_tap: str) -> list[dict[str, Any]]:
+    """Retrieve the name, description, and homepage from each
+    Ruby formula file in the homebrew tap repo.
+    """
+    formulas = []
+    files = os.listdir(build_dir_path(homebrew_tap, FORMULA_FOLDER))
+
+    if not any([file.endswith(".rb") for file in files]):
+        raise SystemExit('No Ruby files found in the "formula_folder" provided.')
+
+    try:
+        for filename in sorted(files):
+            with open(build_dir_path(homebrew_tap, FORMULA_FOLDER, filename), "r") as formula:
+                # Set empty defaults
+                final_name = ""
+                final_desc = ""
+                final_homepage = ""
+
+                for line in formula:
+                    if line.strip().startswith("class"):
+                        name_line = line.split()
+                        name_pieces = []
+                        name_pieces = re.findall("[A-Z][^A-Z]*", name_line[1])
+                        formatted_name = ""
+
+                        for piece in name_pieces:
+                            if piece != name_pieces[-1]:
+                                formatted_name += f"{piece}-"
+                            else:
+                                formatted_name += f"{piece}"
+                            final_name = formatted_name.lower()
+                    if line.strip().startswith("desc"):
+                        final_desc = line.strip().replace("desc ", "").replace('"', "")
+                    if line.strip().startswith("homepage"):
+                        final_homepage = line.strip().replace("homepage ", "").replace('"', "")
+                formula_data = {
+                    "name": final_name,
+                    "desc": final_desc,
+                    "homepage": final_homepage,
+                }
+                formulas.append(formula_data)
+    except Exception as error:
+        raise SystemExit(f"There was a problem opening or reading the formula data: {error}")
+
+    return formulas
+
+
+def _generate_table(formulas: list[dict[str, Any]]) -> str:
+    """Generates a pretty table which will be used in the README file."""
+    logger = woodchips.get(LOGGER_NAME)
+
+    headers = ["Project", "Description", "Install"]
+    rows = []
+
+    for formula in formulas:
+        rows.append(
+            [
+                f"[{formula['name']}]({formula.get('homepage')})",
+                formula.get("desc"),
+                f"`brew install {formula['name']}`",
+            ]
+        )
+
+    table = pretty_tables.create(
+        headers=headers,
+        rows=rows,
+        empty_cell_placeholder="NA",
+    )
+
+    final_table = TABLE_START_TAG + "\n" + table + "\n" + TABLE_END_TAG + "\n"
+
+    logger.debug(final_table)
+
+    return final_table
+
+
+def _retrieve_old_table(homebrew_tap: str) -> Tuple[str, bool]:
+    """Retrives all content between the start/end tags in the README file."""
+    logger = woodchips.get(LOGGER_NAME)
+
+    readme = _does_readme_exist(homebrew_tap)
+    old_table_found = False
+    table_start_found = False
+    table_end_found = False
+    old_table = ""
+
+    if readme:
+        with open(build_dir_path(readme), "r") as readme_contents:
+            for line in readme_contents:
+                normalized_line = line.strip().lower()
+                if normalized_line == TABLE_START_TAG:
+                    table_start_found = True
+                elif normalized_line == TABLE_END_TAG:
+                    table_end_found = True
+
+                # Once we find the start tag, start building the potential replacement
+                if table_start_found:
+                    old_table += line
+                # Once we find both start and end tags, break out of reading more README lines
+                if table_start_found and table_end_found:
+                    old_table_found = True
+                    break
+
+        if old_table_found is False:
+            # If we can't find both start/end tags, reset the table so we don't blow away unassociated README data
+            old_table = ""
+            message = "Could not find both start and end tags for project table in README."
+            logger.warning(message)
+            non_critical_warnings.append(message)
+
+    else:
+        message = "Could not find a valid README in this project to update."
+        logger.warning(message)
+        non_critical_warnings.append(message)
+
+    return old_table, old_table_found
+
+
+def _read_current_readme(homebrew_tap: str) -> str:
+    """Reads the current README content."""
+    logger = woodchips.get(LOGGER_NAME)
+
+    readme = _does_readme_exist(homebrew_tap)
+    file_content = ""
+
+    if readme:
+        with open(build_dir_path(readme), "r") as readme_contents:
+            file_content = readme_contents.read()
+        logger.debug(f"{readme} read successfully.")
+
+    return file_content
+
+
+def _replace_table_contents(file_content: str, old_table: str, new_table: str, homebrew_tap: str):
+    """Replaces the old README project table string with the new
+    project table string including start/end tags.
+    """
+    logger = woodchips.get(LOGGER_NAME)
+
+    readme = _does_readme_exist(homebrew_tap)
+
+    if readme:
+        with open(build_dir_path(readme), "w") as readme_contents:
+            readme_contents.write(file_content.replace(old_table, new_table))
+        logger.debug(f"{readme} table updated successfully.")
+
+
+def _does_readme_exist(homebrew_tap: str) -> Optional[str]:
+    """Determines the README file to open. The README file must either:
+
+    1. Have the file extension of `.md`
+    2. Reside in the root of a project
+    """
+    readme_to_open = None
+    readme_filename = "readme.md"
+    files = os.listdir(build_dir_path(homebrew_tap))
+
+    for filename in files:
+        if filename.lower() == readme_filename:
+            readme_to_open = build_dir_path(homebrew_tap, filename)
+            break
+
+    return readme_to_open

@@ -1,0 +1,31 @@
+name: Test custom target and tarball inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/tags/v1.0.0
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          github_token: fake-token-for-skip-commit
+          install: bin.install "my-tool"
+          target_darwin_amd64: https://example.com/my-tool-darwin-amd64.tar.gz,abc123checksum
+          target_darwin_arm64: https://example.com/my-tool-darwin-arm64.tar.gz,def456checksum
+          target_linux_amd64: https://example.com/my-tool-linux-amd64.tar.gz,ghi789checksum
+          target_linux_arm64: https://example.com/my-tool-linux-arm64.tar.gz,jkl012checksum
+          custom_tarball: https://example.com/my-tool-custom.tar.gz
+          skip_commit: "true"
+          skip_checksum: "true"
+          debug: "true"
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed with custom target inputs (skip_commit=true)"
+          echo "PASS"

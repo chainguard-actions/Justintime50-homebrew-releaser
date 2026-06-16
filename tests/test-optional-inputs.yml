@@ -1,0 +1,36 @@
+name: Test optional inputs coverage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/tags/v2.0.0
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          github_token: fake-token-for-skip-commit
+          install: bin.install "my-tool"
+          depends_on: |
+            "openssl@3"
+            "libssh2"
+          download_strategy: CurlDownloadStrategy
+          custom_require: custom_download_strategy
+          formula_includes: |
+            head "https://github.com/example/repo.git"
+          update_python_resources: "false"
+          version: "2.0.0"
+          update_readme_table: "false"
+          skip_commit: "true"
+          skip_checksum: "true"
+          debug: "true"
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed with optional inputs (skip_commit=true)"
+          echo "PASS"

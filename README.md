@@ -10,6 +10,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 |---------|-----|-----------------|
 | v3.0.1 | [`v3.0.1`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.0.1) | [`d4714da`](https://github.com/Justintime50/homebrew-releaser/commit/d4714da3f9e3a2b8c286b8e9da2b77ee591bb997) |
 | v3.1.0 | [`v3.1.0`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.1.0) | [`635beb6`](https://github.com/Justintime50/homebrew-releaser/commit/635beb66deebc86626c33bd41e39ff2442e2a9cc) |
+| v3.2.0 | [`v3.2.0`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.2.0) | [`570c886`](https://github.com/Justintime50/homebrew-releaser/commit/570c886874d1ebac77f189952ff85e38eb2a2328) |
 | v3.2.1 | [`v3.2.1`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.2.1) | [`292988f`](https://github.com/Justintime50/homebrew-releaser/commit/292988f5e0c558a278d410d18bd946ab2e960d06) |
 | v3.3.0 | [`v3.3.0`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.3.0) | [`a62d7a3`](https://github.com/Justintime50/homebrew-releaser/commit/a62d7a359683bfc047cdb2431f53ee58241464d1) |
 

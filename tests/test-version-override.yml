@@ -1,0 +1,36 @@
+name: Test version override
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/tags/v3.0.1
+      GITHUB_EVENT_NAME: push
+      GITHUB_REPOSITORY: Justintime50/homebrew-releaser
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          homebrew_owner: Justintime50
+          homebrew_tap: homebrew-formulas
+          formula_folder: Formula
+          github_token: dummy-token-for-testing
+          install: 'bin.install "homebrew-releaser"'
+          version: "3.0.1"
+          skip_commit: "true"
+          debug: "true"
+      - name: Assert action ran with version override
+        run: |
+          echo "Action step outcome: ${{ steps.action.outcome }}"
+          # The action requires real GitHub credentials and a real tap to succeed.
+          # We verify it ran (started the Docker container) by checking the outcome
+          # is either success or failure (not skipped or cancelled).
+          outcome="${{ steps.action.outcome }}"
+          if [ "$outcome" = "skipped" ] || [ "$outcome" = "cancelled" ]; then
+            echo "FAIL: action step was skipped or cancelled unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action step ran with outcome: $outcome (version override: 3.0.1)"

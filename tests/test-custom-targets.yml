@@ -1,4 +1,4 @@
-name: Test basic usage
+name: Test custom platform targets
 on:
   workflow_dispatch:
 jobs:
@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run homebrew-releaser with skip_commit
+      - name: Run homebrew-releaser with custom targets
         id: action
         uses: .
         continue-on-error: true
@@ -18,7 +18,11 @@ jobs:
           install: |
             bin.install "my-tool"
           skip_commit: "true"
-          version: "1.0.0"
+          version: "2.0.0"
+          target_darwin_amd64: "https://example.com/my-tool-2.0.0-darwin-amd64.tar.gz,abc123def456abc123def456abc123def456abc123def456abc123def456abc1"
+          target_darwin_arm64: "https://example.com/my-tool-2.0.0-darwin-arm64.tar.gz,def456abc123def456abc123def456abc123def456abc123def456abc123def4"
+          target_linux_amd64: "https://example.com/my-tool-2.0.0-linux-amd64.tar.gz,111222333444555666777888999000aaabbbcccdddeeefff000999888777666"
+          target_linux_arm64: "https://example.com/my-tool-2.0.0-linux-arm64.tar.gz,aaabbbcccdddeeefff000999888777666555444333222111000aaabbbcccddd"
           debug: "true"
       - name: Assert action attempted to run
         run: |

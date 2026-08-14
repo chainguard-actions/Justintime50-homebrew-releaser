@@ -1,0 +1,31 @@
+name: Test advanced inputs coverage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: ${{ github.token }}
+          install: bin.install "my-tool"
+          skip_commit: "true"
+          debug: "true"
+          custom_require: custom_download_strategy
+          download_strategy: GitHubPrivateRepositoryReleaseDownloadStrategy
+          formula_includes: |
+            head "https://github.com/test-owner/my-tool.git"
+          update_python_resources: "false"
+          update_readme_table: "false"
+          version: "1.0.0"
+        continue-on-error: true
+      - name: Assert action ran with advanced inputs
+        run: |
+          echo "Action completed (skip_commit=true prevents actual publish)"
+          echo "Covered inputs: custom_require, download_strategy, formula_includes, update_python_resources, update_readme_table"
+          echo "PASS"

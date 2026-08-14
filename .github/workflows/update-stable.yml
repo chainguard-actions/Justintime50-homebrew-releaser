@@ -1,0 +1,24 @@
+name: update-stable
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: ~
+
+permissions:
+  contents: write
+
+jobs:
+  update-stable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: '0'
+      - name: Update stable git tag
+        run: |
+          git tag --force $STABLE_TAG ${GITHUB_REF##*/}
+          git push origin --delete $STABLE_TAG
+          git push origin $STABLE_TAG
+        env:
+          STABLE_TAG: v3

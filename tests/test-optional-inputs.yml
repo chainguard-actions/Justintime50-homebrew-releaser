@@ -1,4 +1,4 @@
-name: Test basic usage
+name: Test optional inputs
 on:
   workflow_dispatch:
 jobs:
@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run homebrew-releaser with skip_commit
+      - name: Run homebrew-releaser with optional inputs
         id: action
         uses: .
         continue-on-error: true
@@ -15,10 +15,17 @@ jobs:
           homebrew_tap: homebrew-core
           formula_folder: Formula
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit_owner: "Test Bot"
+          commit_email: "testbot@example.com"
+          depends_on: |
+            "openssl@3"
+            "libffi"
           install: |
             bin.install "my-tool"
+          test: |
+            system "#{bin}/my-tool", "--version"
           skip_commit: "true"
-          version: "1.0.0"
+          version: "3.1.0"
           debug: "true"
       - name: Assert action attempted to run
         run: |

@@ -78,7 +78,7 @@ inputs:
     required: false
 runs:
   using: docker
-  image: docker://justintime50/homebrew-releaser@sha256:2eb092ba587907d9fbb010426c2b8d585383dba6a8ab82d3cd1ffd1fd30cacd5 # 3.2.0
+  image: docker://justintime50/homebrew-releaser:3.2.0@sha256:2eb092ba587907d9fbb010426c2b8d585383dba6a8ab82d3cd1ffd1fd30cacd5
   args:
     - ${{ inputs.homebrew_owner }}
     - ${{ inputs.homebrew_tap }}

@@ -1,11 +1,11 @@
-name: Test custom arch targets with skip_commit
+name: Test optional inputs (depends_on, test, commit info)
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      GITHUB_REF: refs/tags/v2.0.0
+      GITHUB_REF: refs/tags/v1.2.3
       GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -16,20 +16,23 @@ jobs:
           homebrew_tap: homebrew-tap
           formula_folder: Formula
           github_token: fake-token-for-skip-commit
+          commit_owner: "Test Bot"
+          commit_email: "testbot@example.com"
+          depends_on: |
+            "openssl@3"
+            "libsodium"
           install: 'bin.install "my-tool"'
-          target_darwin_amd64: "https://example.com/my-tool-darwin-amd64.tar.gz,abc123checksum"
-          target_darwin_arm64: "https://example.com/my-tool-darwin-arm64.tar.gz,def456checksum"
-          target_linux_amd64: "https://example.com/my-tool-linux-amd64.tar.gz,ghi789checksum"
-          target_linux_arm64: "https://example.com/my-tool-linux-arm64.tar.gz,jkl012checksum"
+          test: 'system "#{bin}/my-tool", "--version"'
           skip_commit: "true"
+          skip_checksum: "true"
           debug: "true"
         continue-on-error: true
-      - name: Assert action ran with custom targets
+      - name: Assert action ran with optional inputs
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "action outcome: $OUTCOME"
-          # With custom targets and skip_commit=true, the action should attempt to run.
+          # The action should attempt to run with optional inputs provided.
           # It may fail when trying to authenticate with GitHub API using the fake token,
           # but it should not be skipped or cancelled.
           if [ "$OUTCOME" = "skipped" ] || [ "$OUTCOME" = "cancelled" ]; then

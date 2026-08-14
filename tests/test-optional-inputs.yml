@@ -1,36 +1,40 @@
-name: Test optional inputs coverage
+name: Test optional inputs
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_REF: refs/tags/v2.0.0
-      GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - id: action
+      - name: Run homebrew-releaser with optional inputs
+        id: action
         uses: .
         with:
-          homebrew_owner: test-owner
-          homebrew_tap: homebrew-test
-          github_token: fake-token-for-skip-commit
-          install: bin.install "my-tool"
+          homebrew_owner: "test-owner"
+          homebrew_tap: "homebrew-test"
+          formula_folder: "Formula"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit_owner: "Test Bot"
+          commit_email: "testbot@example.com"
           depends_on: |
             "openssl@3"
             "libssh2"
-          download_strategy: CurlDownloadStrategy
-          custom_require: custom_download_strategy
-          formula_includes: |
-            head "https://github.com/example/repo.git"
-          update_python_resources: "false"
-          version: "2.0.0"
-          update_readme_table: "false"
+          install: 'bin.install "my-tool"'
+          test: 'system "#{bin}/my-tool", "--version"'
+          version: "1.0.0"
           skip_commit: "true"
           skip_checksum: "true"
           debug: "true"
         continue-on-error: true
-      - name: Assert action ran
+      - name: Assert action ran with optional inputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
         run: |
-          echo "Action completed with optional inputs (skip_commit=true)"
-          echo "PASS"
+          echo "outcome: $OUTCOME"
+          # The action should run (success or failure), but must not be skipped or cancelled.
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran with optional inputs (outcome=$OUTCOME)"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi

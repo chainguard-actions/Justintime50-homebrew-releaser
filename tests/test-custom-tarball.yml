@@ -1,4 +1,4 @@
-name: Test basic usage with skip_commit
+name: Test custom tarball input
 on:
   workflow_dispatch:
 jobs:
@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run homebrew-releaser with skip_commit
+      - name: Run homebrew-releaser with custom tarball
         id: action
         uses: .
         with:
@@ -15,20 +15,20 @@ jobs:
           formula_folder: "Formula"
           github_token: ${{ secrets.GITHUB_TOKEN }}
           install: 'bin.install "my-tool"'
+          custom_tarball: "https://github.com/test-owner/my-tool/archive/refs/tags/v1.0.0.tar.gz"
+          version: "1.0.0"
           skip_commit: "true"
           skip_checksum: "true"
           debug: "true"
         continue-on-error: true
-      - name: Assert action ran (skip_commit mode)
+      - name: Assert action ran with custom tarball
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          # With skip_commit=true, the action should either succeed (formula generated)
-          # or fail gracefully (e.g. no release assets found for this repo).
-          # We accept both success and failure as long as the container ran.
+          # The action should run (success or failure), but must not be skipped or cancelled.
           if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action container executed (outcome=$OUTCOME)"
+            echo "PASS: action ran with custom tarball (outcome=$OUTCOME)"
           else
             echo "FAIL: unexpected outcome: $OUTCOME"
             exit 1

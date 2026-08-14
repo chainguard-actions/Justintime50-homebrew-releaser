@@ -1,4 +1,4 @@
-name: Test formula with test command and skip_commit
+name: Test formula with dependencies and includes
 on:
   workflow_dispatch:
 jobs:
@@ -16,16 +16,18 @@ jobs:
           homebrew_tap: homebrew-formulas
           formula_folder: Formula
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          depends_on: |
+            "python@3.11"
           install: |
             bin.install "homebrew-releaser"
           test: |
-            system "#{bin}/homebrew-releaser", "--version"
+            system "#{bin}/homebrew-releaser", "--help"
           skip_commit: 'true'
           skip_checksum: 'true'
           debug: 'true'
           ignore_warnings: 'true'
           version: 'v3.3.0'
-      - name: Assert action ran with test command
+      - name: Assert action ran with dependencies
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -37,4 +39,4 @@ jobs:
             echo "FAIL: action was skipped, expected it to run"
             exit 1
           fi
-          echo "PASS: action ran with test command (outcome=$OUTCOME)"
+          echo "PASS: action ran with dependencies (outcome=$OUTCOME)"

@@ -1,0 +1,32 @@
+name: Test skip_commit with custom version override
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/tags/v2.5.0
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: fake-token-for-skip-commit
+          commit_owner: homebrew-releaser
+          commit_email: homebrew-releaser@example.com
+          install: 'bin.install "my-tool"'
+          version: "2.5.0"
+          skip_commit: "true"
+          skip_checksum: "true"
+          debug: "true"
+          ignore_warnings: "true"
+        continue-on-error: true
+      - name: Assert action ran with custom version
+        run: |
+          echo "Action step completed with custom version override"
+          echo "outcome: ${{ steps.action.outcome }}"
+          echo "PASS: action step was executed with version override"

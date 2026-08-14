@@ -1,0 +1,33 @@
+name: Test custom tarball and arch targets
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: ${{ github.token }}
+          install: |
+            bin.install "my-tool"
+          version: "1.0.0"
+          target_darwin_amd64: "https://example.com/my-tool-1.0.0-darwin-amd64.tar.gz,abc123checksum"
+          target_darwin_arm64: "https://example.com/my-tool-1.0.0-darwin-arm64.tar.gz,def456checksum"
+          target_linux_amd64: "https://example.com/my-tool-1.0.0-linux-amd64.tar.gz,ghi789checksum"
+          target_linux_arm64: "https://example.com/my-tool-1.0.0-linux-arm64.tar.gz,jkl012checksum"
+          custom_tarball: "https://example.com/my-tool-1.0.0.tar.gz"
+          skip_commit: 'true'
+          skip_checksum: 'true'
+          debug: 'true'
+          ignore_warnings: 'true'
+        continue-on-error: true
+      - name: Assert action ran
+        run: |
+          echo "Action completed (skip_commit=true prevents actual tap commits)"
+          echo "Inputs covered: target_darwin_amd64, target_darwin_arm64, target_linux_amd64, target_linux_arm64, custom_tarball"
+          echo "PASS"

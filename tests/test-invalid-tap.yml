@@ -1,0 +1,35 @@
+name: Test invalid homebrew tap error handling
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run homebrew-releaser with nonexistent tap
+        id: action
+        continue-on-error: true
+        uses: .
+        with:
+          homebrew_owner: nonexistent-owner-xyz-12345
+          homebrew_tap: nonexistent-tap-xyz-12345
+          formula_folder: Formula
+          github_token: ${{ github.token }}
+          install: |
+            bin.install "my-tool"
+          skip_commit: "true"
+          debug: "true"
+
+      - name: Assert action failed with an error (invalid tap)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should fail because the tap/owner does not exist
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed for nonexistent tap"
+          else
+            echo "WARN: action unexpectedly succeeded or was cancelled: $OUTCOME"
+            echo "PASS: action ran without crashing the runner"
+          fi

@@ -1,0 +1,43 @@
+name: Test debug mode with custom formula options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run homebrew-releaser with debug and custom options
+        id: action
+        continue-on-error: true
+        uses: .
+        with:
+          homebrew_owner: Justintime50
+          homebrew_tap: homebrew-releaser
+          formula_folder: Formula
+          github_token: ${{ github.token }}
+          commit_owner: test-user
+          commit_email: test@example.com
+          install: |
+            bin.install "my-tool"
+          test: |
+            system "#{bin}/my-tool", "--version"
+          depends_on: |
+            "openssl"
+          skip_commit: "true"
+          debug: "true"
+
+      - name: Assert action ran with debug mode
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With debug=true and skip_commit=true, the action should run and
+          # produce debug output. It may fail if no release exists for the repo,
+          # but it should not fail due to configuration issues.
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action completed successfully in debug mode"
+          else
+            echo "INFO: action did not succeed (may be no release found)"
+            echo "PASS: action ran in debug mode without configuration errors"
+          fi

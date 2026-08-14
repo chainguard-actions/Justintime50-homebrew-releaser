@@ -1,0 +1,37 @@
+name: Test custom version override with skip_commit
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          homebrew_owner: test-owner
+          homebrew_tap: homebrew-test
+          formula_folder: Formula
+          github_token: fake-token-for-testing
+          commit_owner: test-user
+          commit_email: test@example.com
+          install: bin.install "my-tool"
+          version: "2.5.0"
+          depends_on: |
+            "openssl@3"
+          test: system "#{bin}/my-tool", "--version"
+          skip_commit: "true"
+          skip_checksum: "true"
+          debug: "true"
+        continue-on-error: true
+      - name: Assert action ran with custom version
+        run: |
+          echo "Action completed with custom version override (2.5.0)"
+          echo "outcome: ${{ steps.action.outcome }}"
+          # The action may fail due to missing release assets on this test repo,
+          # but it should not be skipped — it must have been invoked.
+          if [ "${{ steps.action.outcome }}" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran with custom version (outcome=${{ steps.action.outcome }})"

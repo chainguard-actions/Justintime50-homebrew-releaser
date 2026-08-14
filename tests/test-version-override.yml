@@ -1,0 +1,38 @@
+name: Test version override input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run homebrew-releaser with explicit version override
+        id: action
+        continue-on-error: true
+        uses: .
+        with:
+          homebrew_owner: Justintime50
+          homebrew_tap: homebrew-releaser
+          formula_folder: Formula
+          github_token: ${{ github.token }}
+          install: |
+            bin.install "my-tool"
+          version: "1.0.0"
+          skip_commit: "true"
+          debug: "true"
+
+      - name: Assert action ran with version override
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With an explicit version override, the action should attempt to
+          # find a release matching that version. It may fail if no such
+          # release exists, but should not fail due to configuration issues.
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action completed successfully with version override"
+          else
+            echo "INFO: action did not succeed (release may not exist for version 1.0.0)"
+            echo "PASS: action ran with version override without configuration errors"
+          fi

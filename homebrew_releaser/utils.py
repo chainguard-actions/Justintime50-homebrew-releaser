@@ -1,0 +1,52 @@
+import os
+from typing import Optional
+
+import requests
+import woodchips
+
+from homebrew_releaser.constants import (
+    GITHUB_HEADERS,
+    LOGGER_NAME,
+    TIMEOUT,
+    WORKING_DIR,
+)
+
+
+def make_github_get_request(url: str, stream: Optional[bool] = False) -> requests.Response:
+    """Make an HTTP GET request."""
+    logger = woodchips.get(LOGGER_NAME)
+
+    headers = GITHUB_HEADERS.copy()
+    if stream:
+        headers["Accept"] = "application/octet-stream"
+
+    response = requests.get(
+        url,
+        headers=headers,
+        allow_redirects=True,  # We need to allow redirects to reach various GitHub resources
+        stream=stream,
+        timeout=TIMEOUT,
+    )
+    response.raise_for_status()
+    logger.debug(f"HTTP GET request made successfully to {url}.")
+
+    return response
+
+
+def write_file(file_path: str, content: str | bytes, mode: str = "w"):
+    """Writes content to a file."""
+    logger = woodchips.get(LOGGER_NAME)
+
+    with open(build_dir_path(file_path), mode) as f:
+        f.write(content)
+    logger.debug(f"{file_path} written successfully.")
+
+
+def get_filename_from_path(path: str) -> str:
+    """Gets the last part of a path (the filename)."""
+    return path.rsplit("/", 1)[1]
+
+
+def build_dir_path(*paths: str) -> str:
+    """Builds a directory path relative to the working directory."""
+    return os.path.join(WORKING_DIR, *paths)

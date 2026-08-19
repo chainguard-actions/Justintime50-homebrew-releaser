@@ -13,6 +13,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v3.2.0 | [`v3.2.0`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.2.0) | [`570c886`](https://github.com/Justintime50/homebrew-releaser/commit/570c886874d1ebac77f189952ff85e38eb2a2328) |
 | v3.2.1 | [`v3.2.1`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.2.1) | [`292988f`](https://github.com/Justintime50/homebrew-releaser/commit/292988f5e0c558a278d410d18bd946ab2e960d06) |
 | v3.3.0 | [`v3.3.0`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v3.3.0) | [`a62d7a3`](https://github.com/Justintime50/homebrew-releaser/commit/a62d7a359683bfc047cdb2431f53ee58241464d1) |
+| v4.0.0 | [`v4.0.0`](https://github.com/chainguard-actions/Justintime50-homebrew-releaser/tree/v4.0.0) | [`454cc0d`](https://github.com/Justintime50/homebrew-releaser/commit/454cc0d45a99949c9ea0bd9f03e6309df1617628) |
 
 ## Privacy
 
